@@ -1,0 +1,12 @@
+include LICENSE README.md README.id.md CHANGELOG.md CITATION.cff CONTRIBUTING.md requirements.txt
+include chat.py verify_chat.py
+recursive-include docs *.md *.bib *.png *.svg *.json
+recursive-include notebooks *.ipynb *.md
+recursive-include scripts *.py
+recursive-include tests *.py
+prune work
+prune outputs
+prune archives
+prune logs
+prune results
+global-exclude __pycache__ *.py[cod] .DS_Store

@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quantum-chat-simulator"
+dynamic = ["version"]
+description = "A local superdense-coding terminal chat simulator and reproducible scientific notebooks"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "Quantum Chat contributors"}]
+keywords = ["quantum", "superdense-coding", "cirq", "qsim", "simulation", "education"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = ["cirq-core==1.7.0", "qsimcirq==0.22.1", "numpy==2.5.4"]
+
+[project.optional-dependencies]
+notebooks = ["jupyterlab>=4,<5", "nbclient>=0.10,<0.11", "nbformat>=5.10,<6", "ipykernel>=6,<8"]
+dev = ["build>=1.2,<2"]
+
+[project.scripts]
+quantum-chat = "densechat.cli:main"
+quantum-viewer = "viewer:main"
+
+[project.urls]
+Homepage = "https://github.com/87jbzyzr9h-gif/Quantum-Chat"
+Repository = "https://github.com/87jbzyzr9h-gif/Quantum-Chat"
+Issues = "https://github.com/87jbzyzr9h-gif/Quantum-Chat/issues"
+
+[tool.setuptools]
+packages = ["densechat"]
+py-modules = ["viewer"]
+
+[tool.setuptools.dynamic]
+version = {attr = "densechat.__version__"}

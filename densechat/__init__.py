@@ -1,2 +1,2 @@
 """Terminal chat using a local superdense-coding simulator."""
-__version__ = '3.0.0'
+__version__ = '0.1.0'

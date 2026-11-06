@@ -1,227 +1,163 @@
-# Superdense Chat
+# Quantum Chat
 
-Chat terminal dua arah Bumi–Mars dengan engine Cirq + qsimcirq yang dibangun
-ulang. Tidak ada QML, corpus latihan, tebakan pesan, pre-shared key, atau
-fallback payload klasik dalam model pengiriman. Pasangan Bell yang dibagikan
-adalah sumber daya quantum; itu berbeda dari pre-shared key kriptografi.
+[![CI](https://github.com/87jbzyzr9h-gif/Quantum-Chat/actions/workflows/ci.yml/badge.svg)](https://github.com/87jbzyzr9h-gif/Quantum-Chat/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Ini **simulasi lokal**. Mac tidak mengirim qubit fisik. Dalam mode jaringan,
-TCP localhost membawa perintah dan hasil simulator secara **klasik**, termasuk
-teks yang dikirim pengguna ke backend tepercaya dan hasilnya ke terminal.
-Tidak ada klaim bahwa TCP telah diubah menjadi quantum channel.
+**A reproducible local superdense-coding simulator with two-way terminal chat,
+an observer viewer, and executable scientific notebooks.**
 
-## Coba langsung dalam satu terminal
+Version **0.1.0 — research preview**. [Bahasa Indonesia](README.id.md).
+
+This project simulates the Bennett–Wiesner protocol using Cirq/qsimcirq.
+An encoded A qubit must reach the receiver before joint decoding with B.
+The server uses **classical localhost TCP to control the simulator**; it does
+not send physical qubits. No faster-than-light communication, entanglement-only
+signalling, quantum encryption, QML or pre-shared-key reconstruction is claimed.
+
+## Scientific notebooks
+
+| Notebook | Explanation and actual computation |
+|---|---|
+| [01 · Superdense coding](notebooks/01_superdense_coding.ipynb) | Bell preparation, Z/X encoding, circuit diagrams, reduced states and four-symbol verification |
+| [02 · Chat protocol](notebooks/02_quantum_chat_protocol.ipynb) | Architecture diagram, UTF-8 frames, two-way messages, resource accounting and noisy trials |
+| [03 · Observer and noise](notebooks/03_observer_and_noise.ipynb) | States, coherence, density matrices, exact noisy ensembles and actual qsim histograms |
+
+Notebooks include executed outputs and assertions. They explain established
+protocols; this project is not a peer-reviewed discovery of a new channel.
+
+![Architecture](docs/figures/quantum_chat_architecture.png)
+
+## Install
+
+Use **Python 3.12** on macOS or Linux with a compatible qsimcirq wheel.
+Dependency versions are pinned. Windows has not been validated.
 
 ```sh
-cd ~/Quantum-Lab
+git clone https://github.com/87jbzyzr9h-gif/Quantum-Chat.git
+cd Quantum-Chat
+python3.12 -m venv .venv
 source .venv/bin/activate
+python -m pip install --only-binary=:all: -r requirements.txt
+python -m pip install --no-deps .
+```
+
+Runtime dependencies are `cirq-core`, `qsimcirq` and `numpy`. `cirq-core`
+supplies the `cirq` import without unused hardware-provider integrations.
+To install notebook and development tools:
+
+```sh
+python -m pip install -e '.[notebooks,dev]'
+jupyter lab
+```
+
+Open the notebooks in order using this environment's Python kernel. Notebook
+execution needs no API key, dataset download or model training. Initial
+installation needs internet.
+
+## Terminal chat
+
+```sh
 python chat.py
+# Installed console command: quantum-chat
 ```
 
-Contoh percakapan:
+Type a message; `/as Mars` changes the sender in demo mode. `/history` shows
+received messages, `/stats` shows resources, and `/quit` exits.
+For one message: `python chat.py --message 'Hai! Apa kabarmu hari ini'`.
 
-```text
-Bumi> Halo Mars 🚀
-[Bumi → Mars #1, checksum OK] Halo Mars 🚀
-[CONFIRMED #1] attempts=1
-Bumi> /as Mars
-Mars> Halo Bumi, diterima!
-Mars> /history
-Mars> /stats
-Mars> /quit
-```
-
-`--demo` memilih mode yang sama secara eksplisit. Pengujian satu pesan:
+For two participants, use three terminals in the same environment/directory:
 
 ```sh
-python chat.py --message 'Hai! Apa kabarmu hari ini'
-```
-
-## Dua terminal peserta dan satu server simulator
-
-Jalankan tiap perintah berikut dari `~/Quantum-Lab` memakai `.venv`.
-
-Terminal server:
-
-```sh
+# Server terminal
 python chat.py --server
-```
-
-Terminal Bumi:
-
-```sh
+# Bumi terminal
 python chat.py --name Bumi
-```
-
-Terminal Mars:
-
-```sh
+# Mars terminal
 python chat.py --name Mars
 ```
 
-Setelah kedua peserta tersambung, ketik pesan biasa di salah satu terminal.
-Penerima melihat teks yang telah melewati engine dan lolos checksum.
-Server hanya bind ke `127.0.0.1`. Port default 8765; gunakan `--port 9000`
-pada server dan kedua client jika port sedang dipakai. Satu nama hanya dapat
-dipakai satu client aktif. Reconnect diperbolehkan setelah koneksi lama lepas.
+Both clients must connect before exchanging messages. The server binds only
+to `127.0.0.1:8765`; change `--port` on all three processes if needed.
+There is no authentication/encryption: do not expose it as a public service.
+Logging is off by default. `--server --log PATH` explicitly saves chat text.
 
-## Perintah chat
-
-| Perintah | Fungsi |
+| Command | Action |
 |---|---|
-| Teks biasa | Kirim ke peserta lainnya |
-| Baris kosong | Kirim pesan kosong |
-| `/as Bumi` atau `/as Mars` | Ganti pengirim, khusus demo satu terminal |
-| `/history` | Tampilkan sampai 100 pesan terakhir yang benar-benar diterima |
-| `/stats` | Biaya model quantum dan biaya TCP simulator yang terpisah |
-| `/send TEKS` | Kirim teks yang diawali `/`; `/send /quit` mengirim literal `/quit` |
-| `/help` | Bantuan singkat |
-| `/quit` | Keluar dari terminal peserta/demo |
+| Plain text / empty line | Send UTF-8 text, including an empty message |
+| `/as Bumi` or `/as Mars` | Switch sender in demo only |
+| `/history`, `/stats` | History / quantum model and separate TCP resource counts |
+| `/send TEXT` | Send slash-prefixed text, e.g. `/send /quit` |
+| `/help`, `/quit` | Help / exit |
 
-Batas pesan 4096 byte UTF-8. Unicode, emoji, kata baru, teks tanpa tanda baca,
-NUL dan beberapa baris didukung oleh protokol. Input interaktif satu baris;
-gunakan `--message` untuk pengujian teks beberapa baris dari shell.
-Karakter kontrol ditampilkan dalam bentuk escape agar tidak menjalankan
-escape terminal. Byte pesan yang didecode tetap dipertahankan persis.
+Message limit: 4096 UTF-8 bytes. History/deduplication are session-only.
 
-Riwayat bersifat sementara selama server/demo hidup, tidak ditulis ke disk
-secara default. `--server --log logs/chat.jsonl` mengaktifkan log yang
-**memuat isi percakapan**, hasil delivery, events dan resource. Tidak ada
-autentikasi atau enkripsi; server ini dibatasi untuk eksperimen lokal.
+## Observer viewer
 
-## Alur superdense coding
+```sh
+python viewer.py --bits 11 --step
+python viewer.py --message 'Hai!' --pairs 1 --step
+python viewer.py --all-symbols --shots 32
+python viewer.py --bits 11 --noise 0.1 --shots 100
+python viewer.py --message 'Hai!' --scope frame --json results/trace.json
+# Installed console command: quantum-viewer
+```
 
-1. Pesan menjadi frame: header 15 byte, teks UTF-8, checksum SHA-256 32 byte.
-   Header mengirim versi, sequence dan panjang teks. Tidak ada target length
-   tersembunyi atau lookup jawaban.
-2. Setiap dua bit frame menggunakan satu Bell pair baru: H(A), CNOT(A,B).
-   B diasumsikan sudah didistribusikan ke penerima dan biayanya dihitung.
-3. Pengirim melakukan Z untuk phase bit dan X untuk flip bit pada A.
-4. A berpindah ke penerima melalui tahap transfer yang eksplisit dalam model.
-5. Penerima menjalankan CNOT(A,B), H(A), lalu mengukur A/B untuk mendapatkan
-   dua bit. Engine hanya mengembalikan hasil pengukuran, tanpa state-vector.
-6. Frame dibangun ulang dari pengukuran tersebut. Endpoint penerima hanya
-   menerima frame hasil pengukuran; validasi checksum/header/UTF-8 dilakukan
-   sebelum pesan masuk riwayat atau ditampilkan.
-7. ACK/NACK 75 byte melalui saluran klasik model. ACK mengikat sequence dan
-   fingerprint frame. Sender hanya berhenti retry setelah ACK valid cocok.
+This is an **independent observer replay**, not a live server tap. Global
+states belong only to the diagnostic observer, never the chat receiver.
+Noisy states use exact density matrices; histograms use independent one-shot
+qsim runs. Frame verification and displayed-pair replay are separate runs.
 
-Referensi primer:
-[IBM superdense coding](https://quantum.cloud.ibm.com/learning/en/courses/basics-of-quantum-information/entanglement-in-action/superdense-coding).
+## Resources, noise and scope
 
-Satu `run(repetitions=1)` per pasangan menghindari artefak pengurutan sampel
-terminal multi-shot yang ditemukan pada eksperimen lama. Cache hanya berisi
-circuit, bukan state atau jawaban; setiap shot mempersiapkan pasangan baru.
+Each frame contains a 15-byte header, UTF-8 payload and 32-byte SHA-256.
+Each two-bit symbol consumes a fresh Bell pair, pre-distributed B, and
+transmitted A. ACK/NACK uses 75 classical bytes. All retries are counted.
+`model_forward_classical_bits=0` describes only the modeled quantum payload,
+never actual classical localhost control traffic.
 
-## Status dan gangguan
-
-`CONFIRMED`: ACK valid kembali ke pengirim. `UNCONFIRMED`: batas attempts
-habis tanpa ACK valid; penerima mungkin sudah menerima pesan. Jika ACK
-hilang, frame yang dikirim ulang tidak ditambahkan sebagai pesan duplikat.
-Sequence yang dipakai untuk isi berbeda ditolak. State duplikasi berlaku
-dalam satu sesi, maksimum 10.000 sequence diterima per endpoint.
+The 25-byte example has a 72-byte frame: 288 Bell pairs, 288 A transfers,
+288 initial B distributions and 600 ACK bits per ideal attempt. Overhead
+is included; this is not reconstruction from a 1–4-byte hint.
 
 ```sh
 python chat.py --demo --noise 0.002 --ack-noise 0.0002 --attempts 5
 ```
 
-`--noise`: probabilitas depolarisasi qubit A saat transit; I dengan peluang
-1-p, X/Y/Z masing-masing p/3. `--ack-noise`: probabilitas flip tiap bit ACK
-klasik. `--attempts` menghitung seluruh pengiriman termasuk percobaan pertama
-(default 3, maksimum 20). Dalam mode dua terminal, opsi ini diatur pada
-server. Bell preparation, distribusi B, penyimpanan dan gate lokal ideal;
-tidak ada FEC, erasure, latensi jaringan fisik, atau hardware nyata.
+`--noise` is depolarization per transmitted A; `--ack-noise` flips classical
+ACK bits independently. Set them on the server for connected clients.
+`CONFIRMED` requires a matching ACK. `UNCONFIRMED` can occur after the receiver
+accepted the frame. Retries do not duplicate an accepted message.
 
-Checksum mendeteksi kerusakan tak sengaja; SHA-256 tanpa kunci bukan
-autentikasi. Keberhasilan tidak dijamin jika saluran terus rusak. Teks
-yang rusak tidak diganti dengan tebakan bahasa.
+Bell preparation, B distribution, storage and local gates are otherwise ideal.
+No hardware latency, erasure, fault tolerance or encryption is modeled.
+SHA-256 detects accidental corruption, not peer authenticity.
 
-## Dua jenis biaya yang berbeda
-
-Biaya model superdense per attempt:
-
-- `frame_bits`: jumlah bit header+payload+checksum yang dikodekan.
-- `bell_pairs`, `sent_a_qubits`: masing-masing setengah `frame_bits`.
-- `distributed_b_qubits`: satu distribusi B per pasangan baru.
-- `classical_ack_bits`: semua ACK/NACK, termasuk yang rusak.
-- `total_quantum_transfers`: distribusi B + pengiriman A; seluruh retry dihitung.
-- `model_forward_classical_bits=0`: hanya berlaku di **model** payload maju.
-
-Untuk target 25 byte, frame baru berukuran 72 byte = 576 bit, sehingga
-memerlukan 288 Bell pair, 288 pengiriman A, 288 distribusi awal B, dan
-600 bit ACK pada pengiriman ideal. Tidak ada kompresi tersembunyi.
-
-Biaya runtime nyata dua terminal dicatat terpisah sebagai
-`simulator_control_received_bytes` dan `simulator_control_sent_bytes`:
-seluruh baris JSON/TCP untuk join, pesan, hasil, status, dan sistem yang
-diproses server. Statistik merupakan snapshot sebelum balasan statistik
-itu sendiri dikirim. Byte TCP tersebut bukan transfer qubit dan tidak
-dimasukkan sebagai keuntungan quantum. Proses demo tunggal tidak memakai TCP.
-
-## Struktur baru
-
-```text
-chat.py                  entry point
-densechat/quantum.py      persiapan, transfer A, joint decoding qsimcirq
-densechat/protocol.py     frame UTF-8, SHA-256, ACK
-densechat/session.py      endpoint, riwayat, retry, resource ledger
-densechat/server.py       kontrol simulator lewat localhost TCP
-densechat/cli.py          demo dan terminal peserta
-tests/                   tes protokol, quantum, percakapan, socket/CLI
-verify_chat.py           200 acceptance trials dua arah
-archives/                source, data, dan hasil lama yang diarsipkan
-results/                 bukti verifikasi versi baru
-```
-
-Kode aktif baru tidak mengimpor source lama dan tidak memuat corpus, QML,
-pre-shared key atau mode payload klasik. Environment `.venv` digunakan ulang;
-dependensi aktif hanya Cirq, qsimcirq, NumPy. Paket lama di environment tidak
-diuninstall karena tidak perlu untuk membangun ulang source aplikasi.
-
-## Tes
+## Reproduce
 
 ```sh
 python -m unittest discover -s tests -v
 python verify_chat.py
+python scripts/execute_notebooks.py --output work/executed-notebooks
+python -m build
 ```
 
-Tes jaringan benar-benar membuka socket localhost sementara, bukan mock
-transport. Pengujian acceptance menjalankan 100 pesan dua arah dalam kondisi
-ideal dan 100 dalam kondisi berisik, termasuk pesan kosong dan Unicode.
-CSV dan metadata disimpan ke `results/`. Angka keberhasilan berasal dari run,
-bukan ditentukan di decoder. Lingkungan sandbox perlu izin bind localhost
-untuk tes jaringan; Terminal macOS biasa tidak memakai sandbox Codex tersebut.
+Tests cover actual loopback clients, all four symbols, UTF-8, corrupted
+frames, ACK loss, retry and viewer ensembles. `verify_chat.py` writes actual
+100-trial ideal and 100-trial noisy results. Outputs are computed, not invented.
+See [architecture](docs/architecture.md), [theory](docs/theory.md),
+[methodology](docs/reproducibility.md), [contributing](CONTRIBUTING.md),
+and [changelog](CHANGELOG.md).
 
+## Citation and references
 
-## Viewer proses quantum
+Use [CITATION.cff](CITATION.cff) for this software and cite the original protocol:
 
-```sh
-python viewer.py --bits 11 --step
-python viewer.py --message 'Hai!' --pairs 4 --step
-python viewer.py --all-symbols --shots 32
-python viewer.py --bits 11 --noise 0.1 --shots 100
-python viewer.py --message 'Hai!' --scope frame --pairs 1 --json results/viewer-trace.json
-```
+1. Bennett, C. H. & Wiesner, S. J. (1992). *Communication via one- and
+   two-particle operators on Einstein-Podolsky-Rosen states*. Physical Review
+   Letters 69, 2881. [doi:10.1103/PhysRevLett.69.2881](https://doi.org/10.1103/PhysRevLett.69.2881).
+2. [IBM Quantum: superdense coding](https://quantum.cloud.ibm.com/learning/en/courses/basics-of-quantum-information/entanglement-in-action/superdense-coding).
+3. [IBM Quantum: reduced states](https://quantum.cloud.ibm.com/learning/en/courses/general-formulation-of-quantum-information/density-matrices/multiple-systems).
+4. [Google Quantum AI: qsimcirq](https://quantumai.google/qsim/tutorials/qsimcirq).
 
-Tanpa argumen, viewer meminta pesan di terminal interaktif; pada input
-non-interaktif memakai demo `Hai!`. `--delay 0.5` menjalankan tampilan otomatis
-setiap setengah detik. `--step` menunggu Enter antara tahap. Ctrl+C berhenti.
-`--start` memilih indeks pasangan, `--pairs` membatasi jumlah pasangan yang
-terlihat. Scope default hanya byte payload; scope `frame` mencakup header dan
-checksum sebagaimana protokol chat.
-
-Viewer memperlihatkan reset, H, CNOT/Bell pair, distribusi B, encoding Z/X,
-transfer A, joint decoding dan pengukuran. Setiap tahap menampilkan circuit,
-amplitudo ideal (qsimcirq), density matrix, probabilitas empat outcome, serta
-marginal/Bloch vector/purity lokal A dan B. Noise memakai density matrix
-ensemble eksak Cirq; tidak menampilkan satu trajectory sebagai state murni
-keseluruhan. Histogram berasal dari shot qsimcirq independen, satu run per
-pasangan Bell baru. State setelah pengukuran memperlihatkan hasil shot pertama.
-
-Ini **observer replay terpisah**, belum live tap server chat. Global state hanya
-untuk observer simulator, tidak pernah diberikan ke decoder chat. Verifikasi
-frame penuh pada mode pesan adalah run terpisah dari trace pasangan yang
-ditampilkan; hasil noisy kedua run tidak harus sama. Distribusi B dan transfer
-A mengubah label kepemilikan; bukan gate yang otomatis mengubah state ideal.
-Tanda minus global pada ket tidak mengubah probabilitas hasil pengukuran.
-Viewer tidak memakai history chat, QML, corpus, atau pre-shared key baru.
+[BibTeX references](docs/references.bib). MIT licensed; see [LICENSE](LICENSE).
+No institutional endorsement or software DOI is implied.

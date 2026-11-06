@@ -46,7 +46,7 @@ def main():
         writer.writeheader()
         writer.writerows(rows)
     (args.output/'verification.json').write_text(json.dumps({'seed': args.seed, 'python': sys.version,
-        'packages': {p: importlib.metadata.version(p) for p in ['cirq', 'qsimcirq', 'numpy']},
+        'packages': {p: importlib.metadata.version(p) for p in ['cirq-core', 'qsimcirq', 'numpy']},
         'profiles': summaries, 'scope': 'Local engine acceptance trials; socket integration is covered by unit tests'}, indent=2)+'\n')
 
 

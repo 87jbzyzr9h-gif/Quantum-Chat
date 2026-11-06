@@ -11,3 +11,9 @@ outputs/
 .env
 .env.*
 !.env.example
+dist/
+build/
+*.egg-info/
+.ipynb_checkpoints/
+.jupyter/
+.venv-public/
