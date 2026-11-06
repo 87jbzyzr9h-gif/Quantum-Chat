@@ -1,4 +1,4 @@
-"""Run reproducible two-way acceptance trials on the new chat engine."""
+"""Jalankan uji penerimaan dua arah yang dapat direproduksi. / Run reproducible two-way acceptance trials on the chat engine."""
 import argparse
 import csv
 import importlib.metadata
@@ -10,9 +10,10 @@ from densechat.session import ChatSession
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, default=Path('results'))
-    parser.add_argument('--seed', type=int, default=20261106)
+    parser = argparse.ArgumentParser(add_help=False, description=__doc__)
+    parser.add_argument('-h', '--help', action='help', help='Tampilkan bantuan lalu keluar / Show this help and exit')
+    parser.add_argument('--output', type=Path, default=Path('results'), help='Direktori hasil / Results directory')
+    parser.add_argument('--seed', type=int, default=20261106, help='Seed acak / Random seed')
     args = parser.parse_args()
     rows, summaries = [], []
     for profile, noise, ack_noise, attempts in [('ideal', 0.0, 0.0, 1), ('noisy', 0.002, 0.0002, 5)]:
@@ -47,7 +48,7 @@ def main():
         writer.writerows(rows)
     (args.output/'verification.json').write_text(json.dumps({'seed': args.seed, 'python': sys.version,
         'packages': {p: importlib.metadata.version(p) for p in ['cirq-core', 'qsimcirq', 'numpy']},
-        'profiles': summaries, 'scope': 'Local engine acceptance trials; socket integration is covered by unit tests'}, indent=2)+'\n')
+        'profiles': summaries, 'scope': 'Uji penerimaan engine lokal; integrasi socket diuji dalam unit test / Local engine acceptance trials; socket integration is covered by unit tests'}, indent=2)+'\n')
 
 
 if __name__ == '__main__':

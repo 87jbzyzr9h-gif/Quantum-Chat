@@ -1,4 +1,4 @@
-"""UTF-8 data frames and classical acknowledgements with SHA-256 checksums."""
+"""Frame data UTF-8 dan ACK klasik dengan checksum SHA-256. / UTF-8 data frames and classical acknowledgements with SHA-256 checksums."""
 from dataclasses import dataclass
 import hashlib
 import hmac
@@ -21,16 +21,16 @@ def digest(data: bytes) -> bytes:
 
 def checked_body(wire: bytes) -> bytes:
     if len(wire) < DIGEST_SIZE or not hmac.compare_digest(digest(wire[:-DIGEST_SIZE]), wire[-DIGEST_SIZE:]):
-        raise InvalidFrame('Checksum tidak cocok')
+        raise InvalidFrame('Checksum tidak cocok / Checksum mismatch')
     return wire[:-DIGEST_SIZE]
 
 
 def encode_message(text: str, sequence: int) -> bytes:
     raw = text.encode('utf-8')
     if len(raw) > MAX_TEXT_BYTES:
-        raise ValueError(f'Pesan maksimum {MAX_TEXT_BYTES} byte UTF-8')
+        raise ValueError(f'Pesan maksimum {MAX_TEXT_BYTES} byte UTF-8 / Message limit: {MAX_TEXT_BYTES} UTF-8 bytes')
     if not 1 <= sequence < 2 ** 64:
-        raise ValueError('Sequence di luar rentang protokol')
+        raise ValueError('Sequence di luar rentang protokol / Sequence outside protocol range')
     body = HEADER.pack(b'SD', 1, sequence, len(raw)) + raw
     return body + digest(body)
 
@@ -44,15 +44,15 @@ class Received:
 
 def decode_message(wire: bytes) -> Received:
     if not HEADER.size + DIGEST_SIZE <= len(wire) <= HEADER.size + MAX_TEXT_BYTES + DIGEST_SIZE:
-        raise InvalidFrame('Panjang frame di luar batas')
+        raise InvalidFrame('Panjang frame di luar batas / Frame length outside bounds')
     body = checked_body(wire)
     magic, version, sequence, length = HEADER.unpack(body[:HEADER.size])
     if magic != b'SD' or version != 1 or not sequence or length != len(body) - HEADER.size:
-        raise InvalidFrame('Header frame tidak valid')
+        raise InvalidFrame('Header frame tidak valid / Invalid frame header')
     try:
         text = body[HEADER.size:].decode('utf-8')
     except UnicodeDecodeError as error:
-        raise InvalidFrame('Payload UTF-8 tidak valid') from error
+        raise InvalidFrame('Payload UTF-8 tidak valid / Invalid UTF-8 payload') from error
     return Received(text, sequence, digest(wire))
 
 

@@ -1,4 +1,4 @@
-include LICENSE README.md README.id.md CHANGELOG.md CITATION.cff CONTRIBUTING.md requirements.txt
+include LICENSE LICENSE.id.md README.md README.id.md CHANGELOG.md CHANGELOG.id.md CITATION.cff CONTRIBUTING.md CONTRIBUTING.id.md requirements.txt
 include chat.py verify_chat.py
 recursive-include docs *.md *.bib *.png *.svg *.json
 recursive-include notebooks *.ipynb *.md

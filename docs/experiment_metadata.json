@@ -1,5 +1,5 @@
 {
-  "release": "0.1.0",
+  "release": "0.1.1",
   "date": "2026-11-06",
   "seed": 20261106,
   "python": "3.12.16",
@@ -16,24 +16,24 @@
     {
       "notebook": "01_superdense_coding.ipynb",
       "code_cells": 6,
-      "sha256": "4e2c0ff68ea307e715ff1e9a52c0b8a0d52bf0cb58bfd6b901976dd3fa331fc3",
+      "sha256": "ecde7f05c417bbad74c39e0837bd4c03e5bcaf3344ef66966992735a0c6dc8f1",
       "errors": 0
     },
     {
       "notebook": "02_quantum_chat_protocol.ipynb",
       "code_cells": 7,
-      "sha256": "f98e4a91b54442f8dcdc224a6e5488756eb1d105ee341c85b8e0f3e045b6e8b7",
+      "sha256": "6ac39450ff13a0602efe953ab5d4f30abba20cc5a11e0203760033683f363e4b",
       "errors": 0
     },
     {
       "notebook": "03_observer_and_noise.ipynb",
       "code_cells": 6,
-      "sha256": "82f5c2be6392a35a99b8f228428204d2ef70c75019b143617015da81513c7f8e",
+      "sha256": "b465977eb36e3a465e40fbd4dad03284461dc011da5ed5d19b77fdd1372463e7",
       "errors": 0
     }
   ],
   "all_executed": true,
-  "scope": "Single-host simulation; exact density matrices for noisy ensembles and qsim one-shot measurements",
+  "scope": "Simulasi satu host; matriks densitas eksak untuk ensemble berisik dan pengukuran qsim satu shot / Single-host simulation; exact density matrices for noisy ensembles and qsim one-shot measurements",
   "parameters": {
     "transport_trials_per_condition": 100,
     "transport_noisy_p": 0.002,
@@ -43,5 +43,9 @@
     "observer_noise_p": 0.2,
     "observer_shots": 512
   },
-  "interpretation": "Synthetic transport fixtures; no training or language-model generalization claim"
+  "interpretation": "Fixture transport sintetik; tanpa pelatihan atau klaim generalisasi model bahasa / Synthetic transport fixtures; no training or language-model generalization claim",
+  "languages": [
+    "id",
+    "en"
+  ]
 }

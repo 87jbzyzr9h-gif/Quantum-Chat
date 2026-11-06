@@ -1,4 +1,4 @@
-"""One chat session, two endpoints, fresh Bell pairs and bounded retries."""
+"""Satu sesi chat, dua endpoint, pasangan Bell baru dan percobaan ulang terbatas. / One chat session, two endpoints, fresh Bell pairs and bounded retries."""
 from dataclasses import asdict, dataclass
 import numpy as np
 from .protocol import InvalidFrame, decode_message, digest, encode_ack, encode_message, valid_ack
@@ -19,7 +19,7 @@ class Resources:
 
 
 class Endpoint:
-    """Accepts measured frame bytes only; never receives sender text or operations."""
+    """Hanya menerima byte frame terukur, tanpa teks atau operasi pengirim. / Accepts measured frame bytes only; never receives sender text or operations."""
     def __init__(self):
         self.accepted = {}
 
@@ -28,9 +28,9 @@ class Endpoint:
             packet = decode_message(wire)
             previous = self.accepted.get(packet.sequence)
             if previous is not None and previous != packet.fingerprint:
-                raise InvalidFrame('Sequence sudah dipakai untuk pesan berbeda')
+                raise InvalidFrame('Sequence sudah dipakai untuk pesan berbeda / Sequence already used for different content')
             if previous is None and len(self.accepted) >= 10000:
-                raise InvalidFrame('Sesi penuh; mulai sesi server/demo baru')
+                raise InvalidFrame('Sesi penuh; mulai sesi server/demo baru / Session full; start a new server/demo session')
             fresh = previous is None
             self.accepted[packet.sequence] = packet.fingerprint
             return packet, fresh, encode_ack(packet.sequence, packet.fingerprint, True), None
@@ -58,7 +58,7 @@ class Delivery:
 class ChatSession:
     def __init__(self, seed: int = 20261106, noise: float = 0, ack_noise: float = 0, attempts: int = 3):
         if seed < 0 or not 0 <= noise <= 1 or not 0 <= ack_noise <= 1 or not 1 <= attempts <= 20:
-            raise ValueError('Seed, peluang noise, atau batas attempts tidak valid')
+            raise ValueError('Seed, peluang noise, atau batas attempts tidak valid / Invalid seed, noise probability, or attempt limit')
         quantum_seed, ack_seed = np.random.SeedSequence(seed).spawn(2)
         self.channel = QuantumChannel(int(quantum_seed.generate_state(1)[0]), noise)
         self.ack_rng = np.random.default_rng(ack_seed)
@@ -68,7 +68,7 @@ class ChatSession:
 
     def add_endpoint(self, name: str):
         if name in self.endpoints:
-            raise ValueError('Nama sudah dipakai dalam sesi ini')
+            raise ValueError('Nama sudah dipakai dalam sesi ini / Name already used in this session')
         self.endpoints[name] = Endpoint()
 
     def _return_ack(self, ack: bytes) -> bytes:
@@ -80,7 +80,7 @@ class ChatSession:
 
     def send(self, sender: str, recipient: str, text: str) -> Delivery:
         if sender == recipient or sender not in self.endpoints or recipient not in self.endpoints:
-            raise ValueError('Pengirim dan penerima harus dua endpoint sesi yang berbeda')
+            raise ValueError('Pengirim dan penerima harus dua endpoint sesi yang berbeda / Sender and recipient must be distinct session endpoints')
         # Validate before consuming a sequence or any quantum resource.
         wire = encode_message(text, self.sequence + 1)
         self.sequence += 1
@@ -117,4 +117,4 @@ class ChatSession:
         return {'messages_attempted': self.sequence, 'messages_received': len(self.history),
                 'resources': self.totals.to_dict(), 'noise_per_a_qubit': self.noise,
                 'ack_bit_error_rate': self.ack_noise, 'max_attempts': self.max_attempts,
-                'note': 'Sumber daya model quantum; transport simulator klasik dihitung terpisah'}
+                'note': 'Sumber daya model quantum; transport simulator klasik dihitung terpisah / Quantum model resources; classical simulator transport is counted separately'}

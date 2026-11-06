@@ -1,4 +1,4 @@
-"""Trusted quantum backend. Only measured symbols cross its output boundary."""
+"""Backend quantum tepercaya; hanya simbol terukur keluar dari batasnya. / Trusted quantum backend. Only measured symbols cross its output boundary."""
 from dataclasses import dataclass
 import cirq
 import qsimcirq
@@ -16,7 +16,7 @@ class ArrivedAtReceiver:
 
 def encode_pair(phase: int, flip: int) -> EncodedAtSender:
     if phase not in (0, 1) or flip not in (0, 1):
-        raise ValueError('Encoding requires two bits')
+        raise ValueError('Encoding memerlukan dua bit / Encoding requires two bits')
     a, b = cirq.LineQubit.range(2)
     circuit = cirq.Circuit(cirq.H(a), cirq.CNOT(a, b))
     if phase:
@@ -27,9 +27,9 @@ def encode_pair(phase: int, flip: int) -> EncodedAtSender:
 
 
 def transfer_qubit_a(pair: EncodedAtSender, noise: float = 0) -> ArrivedAtReceiver:
-    """Quantum-channel ownership transition in the model, not a network API."""
+    """Perpindahan kepemilikan kanal quantum dalam model, bukan API jaringan. / Quantum-channel ownership transition in the model, not a network API."""
     if not isinstance(pair, EncodedAtSender) or not 0 <= noise <= 1:
-        raise ValueError('An encoded pair and a valid noise probability are required')
+        raise ValueError('Diperlukan pasangan terenkode dan peluang noise valid / An encoded pair and a valid noise probability are required')
     circuit = cirq.Circuit(pair.circuit)
     if noise:
         circuit.append(cirq.depolarize(noise)(cirq.LineQubit(0)), strategy=cirq.InsertStrategy.NEW)
@@ -38,7 +38,7 @@ def transfer_qubit_a(pair: EncodedAtSender, noise: float = 0) -> ArrivedAtReceiv
 
 def joint_decode(pair: ArrivedAtReceiver) -> cirq.Circuit:
     if not isinstance(pair, ArrivedAtReceiver):
-        raise PermissionError('Receiver needs transferred A before joint decoding')
+        raise PermissionError('Penerima memerlukan A yang sudah ditransfer sebelum decoding bersama / Receiver needs transferred A before joint decoding')
     a, b = cirq.LineQubit.range(2)
     circuit = cirq.Circuit(pair.circuit)
     circuit.append(cirq.CNOT(a, b), strategy=cirq.InsertStrategy.NEW)

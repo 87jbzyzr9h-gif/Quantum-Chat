@@ -1,5 +1,7 @@
 # Scientific scope and equations
 
+English | [Bahasa Indonesia](theory.id.md)
+
 This is an implementation of established superdense coding for education and
 reproducible numerical exploration, not a new communication law.
 

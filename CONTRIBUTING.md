@@ -1,5 +1,7 @@
 # Contributing
 
+English | [Bahasa Indonesia](CONTRIBUTING.id.md)
+
 Use Python 3.12 and install a fresh virtual environment:
 
 ```sh
@@ -21,6 +23,11 @@ Notebook outputs should come from execution, with fixed seeds and complete
 parameters. Do not hardcode success counts or train on evaluation messages.
 Explain limitations and cite primary sources. Notebooks must run top to bottom
 without network downloads, credentials, absolute personal paths or hidden state.
+
+Update English/Indonesian document pairs together. Each notebook narrative
+section and diagram label has both languages. Terminal messages use both
+languages; code identifiers, commands, statuses, and JSON fields stay stable.
+Scholarly titles and bibliography identifiers retain their original form.
 
 For bug reports include the release version, OS, Python/dependency versions,
 command, seed and a minimal synthetic message. Do not post private chat logs,

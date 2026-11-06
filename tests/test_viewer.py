@@ -20,7 +20,7 @@ class ViewerTests(unittest.TestCase):
             self.assertEqual(trace['histogram'][bits], 4)
             for stage in trace['stages']:
                 self.assertAlmostEqual(sum(stage['probabilities']), 1)
-                if stage['title'] in ('DISTRIBUSI B', 'ENCODE PHASE', 'ENCODE FLIP'):
+                if stage['title'] in ('DISTRIBUSI B / B DISTRIBUTION', 'ENCODING FASE / ENCODE PHASE', 'ENCODING FLIP / ENCODE FLIP'):
                     self.assertEqual(stage['ownership'], {'A': 'Bumi', 'B': 'Mars'})
                     self.assertAlmostEqual(stage['B']['p0'], 0.5)
                     self.assertAlmostEqual(stage['B']['p1'], 0.5)
