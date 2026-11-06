@@ -1,4 +1,4 @@
-"""Loopback-only classical control interface for the trusted quantum simulator."""
+"""Antarmuka kontrol klasik khusus loopback untuk simulator quantum tepercaya. / Loopback-only classical control interface for the trusted quantum simulator."""
 import json
 from pathlib import Path
 import socketserver
@@ -42,7 +42,7 @@ class SimulatorServer(socketserver.ThreadingTCPServer):
         return {**self.session.stats(), 'online': sorted(self.peers),
                 'simulator_control_received_bytes': self.control_received_bytes,
                 'simulator_control_sent_bytes': self.control_sent_bytes,
-                'transport_note': 'TCP localhost carries CLASSICAL simulator commands/results. Counts are a snapshot before the current reply.'}
+                'transport_note': 'TCP localhost membawa perintah/hasil simulator KLASIK; hitungan sebelum balasan ini. / TCP localhost carries CLASSICAL simulator commands/results. Counts are a snapshot before the current reply.'}
 
 
 class PeerHandler(socketserver.StreamRequestHandler):
@@ -69,10 +69,10 @@ class PeerHandler(socketserver.StreamRequestHandler):
         if not data:
             return None
         if len(data) > MAX_LINE_BYTES or not data.endswith(b'\n'):
-            raise ValueError('Permintaan terlalu panjang atau tanpa terminator')
+            raise ValueError('Permintaan terlalu panjang atau tanpa terminator / Request too long or missing terminator')
         value = json.loads(data)
         if not isinstance(value, dict):
-            raise ValueError('Permintaan harus berupa objek JSON')
+            raise ValueError('Permintaan harus berupa objek JSON / Request must be a JSON object')
         return value
 
     def handle(self):
@@ -81,16 +81,16 @@ class PeerHandler(socketserver.StreamRequestHandler):
             if hello is None:
                 return
             if set(hello) != {'action', 'name'} or hello['action'] != 'join' or hello['name'] not in NAMES:
-                raise ValueError('Masuk dengan nama Bumi atau Mars')
+                raise ValueError('Masuk dengan nama Bumi atau Mars / Join as Bumi or Mars')
             with self.server.lock:
                 name = hello['name']
                 if name in self.server.peers:
-                    raise ValueError(f'{name} sudah tersambung')
+                    raise ValueError(f'{name} sudah tersambung / {name} is already connected')
                 self.name = name
                 self.server.peers[name] = self
                 self.emit({'kind': 'welcome', 'name': name, 'online': sorted(self.server.peers),
-                           'notice': 'LOCAL SIMULATION: TCP is classical control traffic, not a physical quantum channel.'})
-                self.server.broadcast({'kind': 'system', 'text': f'{name} tersambung.'})
+                           'notice': 'SIMULASI LOKAL: TCP adalah lalu lintas kontrol klasik, bukan kanal quantum fisik. / LOCAL SIMULATION: TCP is classical control traffic, not a physical quantum channel.'})
+                self.server.broadcast({'kind': 'system', 'text': f'{name} tersambung. / {name} connected.'})
             while True:
                 try:
                     request = self.read_request()
@@ -105,7 +105,7 @@ class PeerHandler(socketserver.StreamRequestHandler):
             with self.server.lock:
                 if self.name and self.server.peers.get(self.name) is self:
                     del self.server.peers[self.name]
-                    self.server.broadcast({'kind': 'system', 'text': f'{self.name} terputus.'})
+                    self.server.broadcast({'kind': 'system', 'text': f'{self.name} terputus. / {self.name} disconnected.'})
 
     def dispatch(self, request: dict):
         action = request.get('action')
@@ -116,10 +116,10 @@ class PeerHandler(socketserver.StreamRequestHandler):
                 self.emit({'kind': 'history', 'messages': self.server.session.history[-100:]})
             elif action == 'send':
                 if set(request) != {'action', 'text'} or not isinstance(request['text'], str):
-                    raise ValueError('Kirim field text berupa string')
+                    raise ValueError('Kirim field text berupa string / Send a string in the text field')
                 other = next(name for name in NAMES if name != self.name)
                 if other not in self.server.peers:
-                    raise ValueError(f'{other} belum tersambung; buka terminal penerima terlebih dahulu')
+                    raise ValueError(f'{other} belum tersambung; buka terminal penerima terlebih dahulu / {other} is offline; open the receiving terminal first')
                 before = len(self.server.session.history)
                 result = self.server.session.send(self.name, other, request['text'])
                 if len(self.server.session.history) > before:
@@ -133,6 +133,6 @@ class PeerHandler(socketserver.StreamRequestHandler):
                             log.write(json.dumps(result.to_dict(), ensure_ascii=True) + '\n')
                     except OSError:
                         self.server.log = None
-                        self.server.broadcast({'kind': 'system', 'text': 'Penulisan log gagal; logging dimatikan, sesi tetap berjalan.'})
+                        self.server.broadcast({'kind': 'system', 'text': 'Penulisan log gagal; logging dimatikan, sesi tetap berjalan. / Log write failed; logging disabled, session continues.'})
             else:
-                raise ValueError('Perintah tidak dikenal')
+                raise ValueError('Perintah tidak dikenal / Unknown command')

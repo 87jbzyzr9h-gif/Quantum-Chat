@@ -1,7 +1,11 @@
 # Scientific notebooks
 
+English | [Bahasa Indonesia](README.id.md)
+
 Run with Python 3.12 after `python -m pip install -e '.[notebooks,dev]'`.
 Select that environment's kernel and execute all cells top to bottom.
+Every notebook narrative is available in Bahasa Indonesia and English, with
+shared equations/code and bilingual figure labels and explanatory outputs.
 
 1. **01_superdense_coding.ipynb**: conventions, Bell preparation, circuit,
    four-symbol qsim verification, partial trace and phase/coherence diagrams.

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "quantum-chat-simulator"
 dynamic = ["version"]
-description = "A local superdense-coding terminal chat simulator and reproducible scientific notebooks"
+description = "Simulator chat terminal superdense coding lokal / Local superdense-coding terminal chat simulator with reproducible bilingual scientific notebooks"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 license = "MIT"

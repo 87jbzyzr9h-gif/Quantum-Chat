@@ -1,4 +1,4 @@
-"""Observer-only terminal viewer for the active superdense chat engine."""
+"""Viewer terminal khusus observer untuk engine chat superdense aktif. / Observer-only terminal viewer for the active superdense chat engine."""
 import argparse
 from collections import Counter
 from dataclasses import dataclass
@@ -28,15 +28,15 @@ class Stage:
 
 
 def build_stages(bits: str, noise: float = 0.0) -> tuple[list[Stage], cirq.Circuit]:
-    """Use engine circuits, inserting observer milestones without extra gates."""
+    """Pakai circuit engine, sisipkan tahap observer tanpa gate tambahan. / Use engine circuits, inserting observer milestones without extra gates."""
     if bits not in LABELS or not 0 <= noise <= 1:
-        raise ValueError('Dua bit 00/01/10/11 dan peluang noise [0,1] diperlukan')
+        raise ValueError('Dua bit 00/01/10/11 dan peluang noise [0,1] diperlukan / Requires two bits 00/01/10/11 and noise probability [0,1]')
     phase, flip = map(int, bits)
     encoded = encode_pair(phase, flip)
     arrived = transfer_qubit_a(encoded, noise)
     complete = joint_decode(arrived)
     circuit = cirq.Circuit()
-    stages = [Stage('RESET', 'Pasangan baru dimulai pada |00>.', 'Bumi', 'Bumi', circuit.freeze())]
+    stages = [Stage('RESET / INISIALISASI', 'Pasangan baru dimulai pada |00>. / A fresh pair starts in |00>.', 'Bumi', 'Bumi', circuit.freeze())]
 
     def append_stage(title, detail, owner_a='Bumi', owner_b='Mars'):
         stages.append(Stage(title, detail, owner_a, owner_b, circuit.freeze()))
@@ -44,25 +44,25 @@ def build_stages(bits: str, noise: float = 0.0) -> tuple[list[Stage], cirq.Circu
     # The engine prepares H and CNOT before any encoding operation.
     preparation = list(encoded.circuit.all_operations())
     circuit.append(preparation[0], strategy=cirq.InsertStrategy.NEW)
-    append_stage('H(A)', 'A dalam superposisi; B masih |0>.', owner_b='Bumi')
+    append_stage('H(A)', 'A dalam superposisi; B masih |0>. / A is in superposition; B remains |0>.', owner_b='Bumi')
     circuit.append(preparation[1], strategy=cirq.InsertStrategy.NEW)
-    append_stage('CNOT(A,B): BELL PAIR', 'Dua qubit kini berada pada Bell state.', owner_b='Bumi')
-    append_stage('DISTRIBUSI B', 'B dipindahkan ke Mars dalam model. State global tetap sama.')
+    append_stage('CNOT(A,B): PASANGAN BELL / BELL PAIR', 'Dua qubit kini berada pada Bell state. / The two qubits now form a Bell state.', owner_b='Bumi')
+    append_stage('DISTRIBUSI B / B DISTRIBUTION', 'B dipindahkan ke Mars dalam model. State global tetap sama. / B is transferred to Mars in the model; the global state is unchanged.')
     if phase:
         circuit.append(next(op for op in preparation[2:] if op.gate == cirq.Z), strategy=cirq.InsertStrategy.NEW)
-    append_stage('ENCODE PHASE', f'Bit fase={phase}: ' + ('Z(A).' if phase else 'identitas, tidak ada gate Z.'))
+    append_stage('ENCODING FASE / ENCODE PHASE', f'Bit fase / Phase bit={phase}: ' + ('Z(A).' if phase else 'identitas, tanpa gate Z / identity, no Z gate.'))
     if flip:
         circuit.append(next(op for op in preparation[2:] if op.gate == cirq.X), strategy=cirq.InsertStrategy.NEW)
-    append_stage('ENCODE FLIP', f'Bit flip={flip}: ' + ('X(A).' if flip else 'identitas, tidak ada gate X.'))
+    append_stage('ENCODING FLIP / ENCODE FLIP', f'Bit flip / Flip bit={flip}: ' + ('X(A).' if flip else 'identitas, tanpa gate X / identity, no X gate.'))
     if tuple(circuit.all_operations()) != tuple(encoded.circuit.all_operations()):
-        raise RuntimeError('Viewer prefix differs from the active encoding engine')
+        raise RuntimeError('Awalan viewer berbeda dari engine encoding aktif / Viewer prefix differs from the active encoding engine')
     circuit = cirq.Circuit(arrived.circuit)
-    append_stage('TRANSFER A', f'A tiba di Mars; depolarisasi transit p={noise:g}.', owner_a='Mars')
+    append_stage('TRANSFER A / A TRANSFER', f'A tiba di Mars; depolarisasi transit p={noise:g}. / A arrives at Mars; transit depolarization p={noise:g}.', owner_a='Mars')
     # Last three moments are the active engine's CNOT, H, and measurement.
     circuit.append(complete[-3], strategy=cirq.InsertStrategy.NEW)
-    append_stage('DECODE: CNOT(A,B)', 'Mars sudah memiliki A dan B; joint decoding diperbolehkan.', owner_a='Mars')
+    append_stage('DECODE / DEKODE: CNOT(A,B)', 'Mars sudah memiliki A dan B; decoding bersama diperbolehkan. / Mars holds A and B; joint decoding is allowed.', owner_a='Mars')
     circuit.append(complete[-2], strategy=cirq.InsertStrategy.NEW)
-    append_stage('DECODE: H(A)', 'Probabilitas berikut adalah peluang hasil pengukuran dua bit.', owner_a='Mars')
+    append_stage('DECODE / DEKODE: H(A)', 'Probabilitas berikut adalah peluang hasil pengukuran dua bit. / These probabilities describe the two-bit measurement outcomes.', owner_a='Mars')
     return stages, complete
 
 
@@ -128,7 +128,7 @@ def trace_pair(bits: str, noise: float, seed: int, shots: int) -> dict:
         histogram[received] += 1
     collapsed = np.zeros((4, 4), dtype=np.complex128)
     collapsed[int(first, 2), int(first, 2)] = 1
-    records.append({'title': 'MEASURE A,B', 'detail': 'Satu hasil shot pertama; state bersyarat setelah pengukuran.',
+    records.append({'title': 'UKUR A,B / MEASURE A,B', 'detail': 'Satu hasil shot pertama; state bersyarat setelah pengukuran. / First-shot outcome; conditional post-measurement state.',
                     'ownership': {'A': 'Mars', 'B': 'Mars'}, 'circuit': str(circuit),
                     'state_vector_notation': f'|{first}⟩',
                     'density_matrix': [[[float(v.real), float(v.imag)] for v in row] for row in collapsed],
@@ -140,46 +140,47 @@ def trace_pair(bits: str, noise: float, seed: int, shots: int) -> dict:
 
 def show_record(record: dict, number: int, total: int):
     print(f'\n[{number:02d}/{total:02d}] {record["title"]}\n{record["detail"]}')
-    print(f'Lokasi: A={record["ownership"]["A"]}, B={record["ownership"]["B"]}')
-    print(record['circuit'] or '(belum ada gate)')
+    print(f'Lokasi / Location: A={record["ownership"]["A"]}, B={record["ownership"]["B"]}')
+    print(record['circuit'] or '(belum ada gate / no gates yet)')
     if record['state_vector_notation'] is not None:
-        print('State global:', record['state_vector_notation'])
+        print('State global / Global state:', record['state_vector_notation'])
     else:
-        print('State global campuran: tidak ada satu state-vector untuk seluruh ensemble.')
-    print(f'Global purity={record["global_purity"]:.4f}')
+        print('State global campuran: tidak ada satu state-vector untuk seluruh ensemble. / Mixed global state: no single state vector describes the entire ensemble.')
+    print(f'Kemurnian global / Global purity={record["global_purity"]:.4f}')
     for label, probability in zip(LABELS, record['probabilities']):
         filled = round(probability * 24)
         print(f'  |{label}>  [{"#" * filled}{"." * (24 - filled)}] {probability:7.2%}')
     for name in ('A', 'B'):
         local = record[name]
         bloch = ', '.join(f'{x:+.3f}' for x in local['bloch'])
-        print(f'  Lokal {name}: P(0)={local["p0"]:.2%}, P(1)={local["p1"]:.2%}; Bloch=({bloch}); purity={local["purity"]:.3f}')
+        print(f'  Lokal / Local {name}: P(0)={local["p0"]:.2%}, P(1)={local["p1"]:.2%}; Bloch=({bloch}); kemurnian / purity={local["purity"]:.3f}')
     rho = np.asarray([[complex(*value) for value in row] for row in record['density_matrix']])
-    print('Density matrix global, urutan |00>, |01>, |10>, |11>:')
+    print('Matriks densitas global / Global density matrix, basis |00>, |01>, |10>, |11>:')
     print('\n'.join(density_rows(rho)), flush=True)
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(add_help=False, description=__doc__)
+    parser.add_argument('-h', '--help', action='help', help='Tampilkan bantuan lalu keluar / Show this help and exit')
     source = parser.add_mutually_exclusive_group()
-    source.add_argument('--bits', choices=LABELS, help='Visualize one chosen two-bit symbol')
-    source.add_argument('--all-symbols', action='store_true')
-    source.add_argument('--message', help='Trace selected pairs from a UTF-8 message')
-    parser.add_argument('--scope', choices=('payload', 'frame'), default='payload')
-    parser.add_argument('--start', type=int, default=0, help='Zero-based pair index within selected scope')
-    parser.add_argument('--pairs', type=int, default=4, help='Maximum pairs to display (1..32)')
-    parser.add_argument('--noise', type=float, default=0)
-    parser.add_argument('--shots', type=int, default=32, help='Independent Bell preparations per displayed pair')
-    parser.add_argument('--seed', type=int, default=20261106)
-    parser.add_argument('--step', action='store_true', help='Press Enter between stages')
-    parser.add_argument('--delay', type=float, default=0, help='Automatic delay per stage, seconds (0..5)')
-    parser.add_argument('--json', type=Path, help='Save the observer trace as JSON')
+    source.add_argument('--bits', choices=LABELS, help='Lihat satu simbol dua bit / Visualize one chosen two-bit symbol')
+    source.add_argument('--all-symbols', action='store_true', help='Tampilkan empat simbol / Show all four symbols')
+    source.add_argument('--message', help='Telusuri pasangan dari pesan UTF-8 / Trace selected pairs from a UTF-8 message')
+    parser.add_argument('--scope', choices=('payload', 'frame'), default='payload', help='Cakupan data yang ditelusuri / Data scope to trace')
+    parser.add_argument('--start', type=int, default=0, help='Indeks pasangan dari nol dalam cakupan pilihan / Zero-based pair index within selected scope')
+    parser.add_argument('--pairs', type=int, default=4, help='Maksimum pasangan yang ditampilkan (1..32) / Maximum pairs to display (1..32)')
+    parser.add_argument('--noise', type=float, default=0, help='Peluang depolarisasi A / A depolarization probability')
+    parser.add_argument('--shots', type=int, default=32, help='Persiapan Bell independen per pasangan yang ditampilkan / Independent Bell preparations per displayed pair')
+    parser.add_argument('--seed', type=int, default=20261106, help='Seed acak nonnegatif / Nonnegative random seed')
+    parser.add_argument('--step', action='store_true', help='Tekan Enter antar tahap / Press Enter between stages')
+    parser.add_argument('--delay', type=float, default=0, help='Jeda otomatis per tahap, detik (0..5) / Automatic delay per stage, seconds (0..5)')
+    parser.add_argument('--json', type=Path, help='Simpan trace observer sebagai JSON / Save the observer trace as JSON')
     args = parser.parse_args(argv)
     if args.seed < 0 or not 0 <= args.noise <= 1 or not 1 <= args.shots <= 1000 or not 1 <= args.pairs <= 32 or args.start < 0 or not 0 <= args.delay <= 5:
-        parser.error('Invalid seed, probability, shots, pair count, start, or delay')
-    print('SUPERDENSE QUANTUM VIEWER — OBSERVER MODE')
-    print('Replay terpisah, bukan live tap server. State global hanya untuk observer simulator; tidak dikirim ke decoder chat.')
-    print('Qubit order A,B; P(0)/P(1) lokal tidak memperlihatkan pilihan encoding ketika kedua qubit masih terpisah.')
+        parser.error('Seed, peluang, shot, jumlah pasangan, awal, atau jeda tidak valid / Invalid seed, probability, shots, pair count, start, or delay')
+    print('SUPERDENSE QUANTUM VIEWER — MODE OBSERVER / OBSERVER MODE')
+    print('Replay terpisah; state global hanya untuk observer simulator. / Independent replay, not a live server tap. Global states are observer-only and never sent to the chat decoder.')
+    print('Urutan qubit A,B; peluang lokal tidak memperlihatkan encoding saat qubit terpisah. / Qubit order A,B; local P(0)/P(1) cannot reveal the encoding while qubits are separated.')
     traces, frame_result = [], None
     if args.all_symbols:
         selected = [(index, bits) for index, bits in enumerate(LABELS)]
@@ -187,7 +188,7 @@ def main(argv=None):
         selected = [(0, args.bits)]
     else:
         if args.message is None:
-            args.message = input('Pesan untuk dilihat (Enter = Hai!): ') if sys.stdin.isatty() else 'Hai!'
+            args.message = input('Pesan untuk dilihat / Message to inspect (Enter = Hai!): ') if sys.stdin.isatty() else 'Hai!'
             if not args.message:
                 args.message = 'Hai!'
         try:
@@ -197,9 +198,9 @@ def main(argv=None):
         payload = args.message.encode('utf-8')
         data = payload if args.scope == 'payload' else frame
         if data and args.start >= len(data) * 4:
-            parser.error('--start is beyond the selected data')
-        print(f'Pesan UTF-8: {args.message!r}\nPayload={len(payload)} byte; frame={len(frame)} byte (header={HEADER.size}, checksum=32).')
-        print(f'Scope trace={args.scope}; total={len(data) * 4} pasangan. Trace dibatasi agar output terbaca.')
+            parser.error('--start melewati data pilihan / --start is beyond the selected data')
+        print(f'Pesan UTF-8 / UTF-8 message: {args.message!r}\nPayload={len(payload)} byte / bytes; frame={len(frame)} byte / bytes (header={HEADER.size}, checksum=32).')
+        print(f'Cakupan / Scope={args.scope}; total={len(data) * 4} pasangan / pairs. Trace dibatasi agar terbaca. / Trace is limited for readability.')
         pairs = [(index, f'{(byte >> shift) & 3:02b}') for index, (byte, shift) in
                  enumerate((byte, shift) for byte in data for shift in (6, 4, 2, 0))]
         selected = pairs[args.start:args.start + args.pairs]
@@ -209,13 +210,13 @@ def main(argv=None):
             frame_result = {'accepted': True, 'received_text': received.text}
         except InvalidFrame as error:
             frame_result = {'accepted': False, 'received_text': None, 'error': str(error)}
-        print('Verifikasi frame penuh (run terpisah):', json.dumps(frame_result, ensure_ascii=True))
+        print('Verifikasi frame penuh (run terpisah) / Full-frame verification (separate run):', json.dumps(frame_result, ensure_ascii=True))
         if not selected:
-            print('Payload kosong: gunakan --scope frame untuk menelusuri header/checksum.')
+            print('Payload kosong: gunakan --scope frame untuk menelusuri header/checksum. / Empty payload: use --scope frame to inspect header/checksum.')
     seeds = np.random.SeedSequence(args.seed).spawn(len(selected))
     try:
         for (index, bits), child in zip(selected, seeds):
-            print(f'\n{"=" * 64}\nPAIR #{index} | input phase,flip = {bits} | noise={args.noise:g}')
+            print(f'\n{"=" * 64}\nPASANGAN / PAIR #{index} | input fase,flip / phase,flip = {bits} | noise={args.noise:g}')
             trace = trace_pair(bits, args.noise, int(child.generate_state(1)[0]), args.shots)
             trace['pair_index'] = index
             traces.append(trace)
@@ -223,18 +224,18 @@ def main(argv=None):
                 show_record(record, number, len(trace['stages']))
                 if number < len(trace['stages']):
                     if args.step:
-                        input('Enter untuk tahap berikutnya; Ctrl+C untuk berhenti...')
+                        input('Enter untuk tahap berikutnya; Ctrl+C untuk berhenti. / Enter for next stage; Ctrl+C to stop...')
                     elif args.delay:
                         time.sleep(args.delay)
-            print(f'Shot pertama: {trace["first_measurement"]}; cocok input={trace["first_measurement"] == bits}')
-            print(f'Histogram {args.shots} persiapan Bell baru:', json.dumps(trace['histogram']))
+            print(f'Shot pertama / First shot: {trace["first_measurement"]}; cocok input / matches input={trace["first_measurement"] == bits}')
+            print(f'Histogram {args.shots} persiapan Bell baru / fresh Bell preparations:', json.dumps(trace['histogram']))
     except (KeyboardInterrupt, EOFError):
-        print('\nViewer dihentikan.')
+        print('\nViewer dihentikan. / Viewer stopped.')
     if args.json:
         args.json.parent.mkdir(parents=True, exist_ok=True)
         args.json.write_text(json.dumps({'observer_only': True, 'live_server_tap': False,
             'seed': args.seed, 'frame_verification_separate_run': frame_result, 'traces': traces}, indent=2) + '\n')
-        print('Trace tersimpan:', args.json)
+        print('Trace tersimpan / Trace saved:', args.json)
 
 
 if __name__ == '__main__':

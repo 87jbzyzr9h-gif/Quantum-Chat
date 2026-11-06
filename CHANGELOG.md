@@ -1,5 +1,15 @@
 # Changelog
 
+English | [Bahasa Indonesia](CHANGELOG.id.md)
+
+## 0.1.1 — 2026-11-06
+
+- Complete English/Indonesian documentation pairs, including the full README,
+  contributor guide, theory, architecture, reproducibility, and release process.
+- Bilingual notebook narratives, table/figure labels, terminal help, observer
+  explanations, validation messages, and an informational MIT translation.
+- Technical identifiers and scientific calculations remain unchanged.
+
 ## 0.1.0 — 2026-11-06
 
 First public research preview. Earlier internal prototype numbering is not a

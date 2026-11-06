@@ -1,5 +1,7 @@
 # Reproducibility
 
+English | [Bahasa Indonesia](reproducibility.id.md)
+
 Use Python 3.12 and pinned runtime versions from `requirements.txt`. Jupyter
 and build tools are optional extras. No private data, model training, API keys
 or network downloads are used during notebook computation.

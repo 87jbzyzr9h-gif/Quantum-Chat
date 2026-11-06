@@ -6,7 +6,9 @@
 **A reproducible local superdense-coding simulator with two-way terminal chat,
 an observer viewer, and executable scientific notebooks.**
 
-Version **0.1.0 — research preview**. [Bahasa Indonesia](README.id.md).
+Version **0.1.1 — research preview**. English | [Bahasa Indonesia](README.id.md).
+Full documentation is available in both languages. Notebooks, diagrams, help,
+and terminal messages display Indonesian and English side by side.
 
 This project simulates the Bennett–Wiesner protocol using Cirq/qsimcirq.
 An encoded A qubit must reach the receiver before joint decoding with B.
@@ -90,6 +92,8 @@ Logging is off by default. `--server --log PATH` explicitly saves chat text.
 | `/help`, `/quit` | Help / exit |
 
 Message limit: 4096 UTF-8 bytes. History/deduplication are session-only.
+Commands, flags, `CONFIRMED`/`UNCONFIRMED` statuses, and JSON fields are shared
+technical identifiers in both languages; their explanations are bilingual.
 
 ## Observer viewer
 
@@ -146,7 +150,7 @@ frames, ACK loss, retry and viewer ensembles. `verify_chat.py` writes actual
 100-trial ideal and 100-trial noisy results. Outputs are computed, not invented.
 See [architecture](docs/architecture.md), [theory](docs/theory.md),
 [methodology](docs/reproducibility.md), [contributing](CONTRIBUTING.md),
-and [changelog](CHANGELOG.md).
+[release process](docs/release_process.md), and [changelog](CHANGELOG.md).
 
 ## Citation and references
 
@@ -159,5 +163,5 @@ Use [CITATION.cff](CITATION.cff) for this software and cite the original protoco
 3. [IBM Quantum: reduced states](https://quantum.cloud.ibm.com/learning/en/courses/general-formulation-of-quantum-information/density-matrices/multiple-systems).
 4. [Google Quantum AI: qsimcirq](https://quantumai.google/qsim/tutorials/qsimcirq).
 
-[BibTeX references](docs/references.bib). MIT licensed; see [LICENSE](LICENSE).
+[BibTeX references](docs/references.bib). MIT licensed; see [LICENSE](LICENSE) and the [Indonesian translation](LICENSE.id.md).
 No institutional endorsement or software DOI is implied.

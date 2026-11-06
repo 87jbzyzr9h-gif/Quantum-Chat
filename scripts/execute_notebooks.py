@@ -1,4 +1,4 @@
-"""Execute notebooks from clean kernels and validate their completed outputs."""
+"""Eksekusi notebook dari kernel bersih dan validasi keluarannya. / Execute notebooks from clean kernels and validate their completed outputs."""
 import argparse
 import hashlib
 import json
@@ -9,9 +9,10 @@ from nbclient import NotebookClient
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, default=Path('work/executed-notebooks'))
-    parser.add_argument('--in-place', action='store_true', help='Refresh checked-in scientific outputs')
+    parser = argparse.ArgumentParser(add_help=False, description=__doc__)
+    parser.add_argument('-h', '--help', action='help', help='Tampilkan bantuan lalu keluar / Show this help and exit')
+    parser.add_argument('--output', type=Path, default=Path('work/executed-notebooks'), help='Direktori notebook hasil eksekusi / Executed notebooks directory')
+    parser.add_argument('--in-place', action='store_true', help='Perbarui keluaran ilmiah dalam repository / Refresh checked-in scientific outputs')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     destination = root/'notebooks' if args.in_place else args.output.resolve()
@@ -23,7 +24,7 @@ def main():
             if cell.cell_type == 'code':
                 cell.outputs = []
                 cell.execution_count = None
-        print('Executing', path.name, flush=True)
+        print('Menjalankan / Executing', path.name, flush=True)
         client = NotebookClient(notebook, timeout=180, kernel_name='python3',
                                 resources={'metadata': {'path': str(root)}})
         client.execute()
@@ -39,7 +40,7 @@ def main():
         records.append({'notebook': path.name, 'code_cells': len(codes),
                         'sha256': hashlib.sha256(target.read_bytes()).hexdigest(), 'errors': 0})
     if not records:
-        raise SystemExit('No notebooks found')
+        raise SystemExit('Notebook tidak ditemukan / No notebooks found')
     summary = {'notebooks': records, 'all_executed': True}
     report_path = root/'work/notebook-execution.json'
     report_path.parent.mkdir(exist_ok=True)

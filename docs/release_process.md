@@ -1,5 +1,7 @@
 # Public release and private mirror
 
+English | [Bahasa Indonesia](release_process.id.md)
+
 `Quantum-Chat` is the canonical public repository. Its `origin` uses ordinary
 branch/tag pushes, never `push --mirror` from the working checkout. The separate
 `Quantum-Chat-Private` repository is a private Git mirror of the public branch
@@ -31,3 +33,6 @@ and are not replicated by this operation. No token is stored in the repository.
 
 The initial public release is `v0.1.0`, marked as a research preview. There is no
 PyPI publication, software DOI, hardware link or peer-review claim.
+
+Version `v0.1.1` adds complete Indonesian/English documentation and presentation.
+Historical tags and the initial release assets remain unchanged.
